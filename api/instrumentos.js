@@ -4,22 +4,15 @@ const sql = neon(process.env.DATABASE_URL);
 
 export default async function handler(req, res) {
   try {
-    if (req.method === "GET") {
-      const instrumentos = await sql`
-        SELECT *
-        FROM instrumentos
-        ORDER BY id DESC
-      `;
+    const resultado = await sql`
+      SELECT COUNT(*) as total
+      FROM instrumentos
+    `;
 
-      return res.status(200).json(instrumentos);
-    }
-
-    res.status(405).json({
-      error: "Método não permitido",
-    });
+    return res.status(200).json(resultado);
   } catch (error) {
-    res.status(500).json({
-      error: error.message,
+    return res.status(500).json({
+      erro: error.message,
     });
   }
 }
