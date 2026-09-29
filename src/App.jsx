@@ -83,11 +83,22 @@ export default function App() {
     setEditando(index);
   };
 
-  const remover = (index) => {
-    if (window.confirm("Deseja excluir este registro?")) {
-      setDados(dados.filter((_, i) => i !== index));
+  const remover = async (id) => {
+    if (!window.confirm("Deseja excluir este registro?")) {
+      return;
     }
+
+    await fetch("/api/instrumentos", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id }),
+    });
+
+    setDados((prev) => prev.filter((item) => item.id !== id));
   };
+
   const duplicar = (index) => {
     const novoRegistro = {
       ...dados[index],
@@ -770,7 +781,7 @@ export default function App() {
                       </button>
 
                       <button
-                        onClick={() => remover(i)}
+                        onClick={() => remover(d.id)}
                         style={{
                           background: "#dc2626",
                           color: "white",
