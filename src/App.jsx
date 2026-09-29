@@ -4,11 +4,12 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 export default function App() {
-  const [dados, setDados] = useState(() => {
-    const dadosSalvos = localStorage.getItem("instrumentos");
-    return dadosSalvos ? JSON.parse(dadosSalvos) : [];
-  });
-
+  const [dados, setDados] = useState([]);
+  useEffect(() => {
+    fetch("/api/instrumentos")
+      .then((res) => res.json())
+      .then((data) => setDados(data));
+  }, []);
   const [busca, setBusca] = useState("");
   const [editando, setEditando] = useState(null);
   const [ordem, setOrdem] = useState({
@@ -28,10 +29,6 @@ export default function App() {
     calibracao: "",
     observacao: "",
   });
-
-  useEffect(() => {
-    localStorage.setItem("instrumentos", JSON.stringify(dados));
-  }, [dados]);
 
   const change = (e) => {
     setForm({
@@ -53,9 +50,19 @@ export default function App() {
 
       alert("✅ Instrumento atualizado com sucesso!");
     } else {
-      setDados([...dados, form]);
+      fetch("/api/instrumentos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      })
+        .then((res) => res.json())
+        .then((novo) => {
+          setDados((prev) => [novo, ...prev]);
 
-      alert("✅ Instrumento cadastrado com sucesso!");
+          alert("✅ Instrumento cadastrado com sucesso!");
+        });
     }
 
     setForm({
@@ -92,10 +99,7 @@ export default function App() {
   };
 
   const limparTudo = () => {
-    if (window.confirm("Deseja apagar todos os registros?")) {
-      setDados([]);
-      localStorage.removeItem("instrumentos");
-    }
+    alert("Função ainda não conectada ao banco.");
   };
 
   const excel = () => {

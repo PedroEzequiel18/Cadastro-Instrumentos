@@ -14,6 +14,48 @@ export default async function handler(req, res) {
       return res.status(200).json(instrumentos);
     }
 
+    if (req.method === "POST") {
+      const {
+        equipamento,
+        fabricante,
+        faixa,
+        os,
+        ativo,
+        ci,
+        certificado,
+        calibracao,
+        observacao,
+      } = req.body;
+
+      const resultado = await sql`
+        INSERT INTO instrumentos (
+          equipamento,
+          fabricante,
+          faixa,
+          os,
+          ativo,
+          ci,
+          certificado,
+          calibracao,
+          observacao
+        )
+        VALUES (
+          ${equipamento},
+          ${fabricante},
+          ${faixa},
+          ${os},
+          ${ativo},
+          ${ci},
+          ${certificado},
+          ${calibracao || null},
+          ${observacao}
+        )
+        RETURNING *
+      `;
+
+      return res.status(201).json(resultado[0]);
+    }
+
     return res.status(405).json({
       error: "Método não permitido",
     });
