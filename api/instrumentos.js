@@ -1,8 +1,21 @@
 import { neon } from "@neondatabase/serverless";
 
 const sql = neon(process.env.DATABASE_URL);
-
 export default async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET,POST,PUT,DELETE,OPTIONS"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type"
+  );
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
   try {
     // LISTAR
     if (req.method === "GET") {
@@ -14,7 +27,6 @@ export default async function handler(req, res) {
 
       return res.status(200).json(instrumentos);
     }
-
     // CADASTRAR
     if (req.method === "POST") {
       const {
@@ -56,6 +68,40 @@ export default async function handler(req, res) {
       `;
 
       return res.status(201).json(resultado[0]);
+    }
+
+    // EDITAR
+    if (req.method === "PUT") {
+      const {
+        id,
+        equipamento,
+        fabricante,
+        faixa,
+        os,
+        ativo,
+        ci,
+        certificado,
+        calibracao,
+        observacao,
+      } = req.body;
+
+      const resultado = await sql`
+        UPDATE instrumentos
+        SET
+          equipamento = ${equipamento},
+          fabricante = ${fabricante},
+          faixa = ${faixa},
+          os = ${os},
+          ativo = ${ativo},
+          ci = ${ci},
+          certificado = ${certificado},
+          calibracao = ${calibracao || null},
+          observacao = ${observacao}
+        WHERE id = ${id}
+        RETURNING *
+      `;
+
+      return res.status(200).json(resultado[0]);
     }
 
     // EXCLUIR
