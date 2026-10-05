@@ -91,14 +91,27 @@ export default function App() {
     setEditando(item.id);
   };
 
-  const remover = (id) => {
+  const remover = async (id) => {
     if (!window.confirm("Deseja excluir este registro?")) {
       return;
     }
 
-    setDados((prev) => prev.filter((item) => item.id !== id));
+    try {
+      await fetch("/api/instrumentos", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id }),
+      });
 
-    alert("✅ Registro excluído!");
+      setDados((prev) => prev.filter((item) => item.id !== id));
+
+      alert("✅ Registro excluído!");
+    } catch (erro) {
+      console.error(erro);
+      alert("Erro ao excluir");
+    }
   };
 
   const limparTudo = () => {
